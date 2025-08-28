@@ -1,6 +1,7 @@
 # Machine Learning Models: A Comprehensive Development Guide
 
 ## Table of Contents
+
 1. [Introduction](#introduction)
 2. [The Machine Learning Pipeline](#the-machine-learning-pipeline)
 3. [Data Preparation](#data-preparation)
@@ -22,58 +23,16 @@ The journey from problem definition to deployed model requires rigorous methodol
 
 ### Overview Schema
 
-```
-┌─────────────────┐
-│ Problem         │
-│ Definition      │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Data            │
-│ Collection      │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Data            │
-│ Preparation     │
-│ & Cleaning      │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Feature         │
-│ Engineering     │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Model           │
-│ Selection       │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Training &      │
-│ Validation      │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Evaluation      │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Deployment      │
-└────────┬────────┘
-         │
-         ▼
-┌─────────────────┐
-│ Monitoring &    │
-│ Maintenance     │
-└─────────────────┘
+```mermaid
+flowchart TD
+    A[Problem Definition] --> B[Data Collection]
+    B --> C[Data Preparation & Cleaning]
+    C --> D[Feature Engineering]
+    D --> E[Model Selection]
+    E --> F[Training & Validation]
+    F --> G[Evaluation]
+    G --> H[Deployment]
+    H --> I[Monitoring & Maintenance]
 ```
 
 Each stage in this pipeline is critical and interconnected. Failures or oversights at any stage cascade downstream, potentially compromising the entire system.
@@ -82,212 +41,147 @@ Each stage in this pipeline is critical and interconnected. Failures or oversigh
 
 ### Data Split Architecture
 
-```
-┌──────────────────────────────────────┐
-│         Original Dataset             │
-│              (100%)                  │
-└──────────────┬───────────────────────┘
-               │
-               ▼
-    ┌──────────┴──────────┐
-    │                     │
-    ▼                     ▼
-┌─────────┐         ┌──────────┐
-│Training │         │Test Set  │
-│  (80%)  │         │  (20%)   │
-└────┬────┘         └──────────┘
-     │
-     ▼
-┌─────────────────────────┐
-│   Training Process      │
-│  ┌─────────────────┐    │
-│  │ Train Set (64%) │    │
-│  └─────────────────┘    │
-│  ┌─────────────────┐    │
-│  │ Valid Set (16%) │    │
-│  └─────────────────┘    │
-└─────────────────────────┘
+```mermaid
+flowchart TD
+    A[Original Dataset (100%)] --> B[Training Set (80%)]
+    A --> C[Test Set (20%)]
+    B --> D[Train Subset (64%)]
+    B --> E[Validation Subset (16%)]
 ```
 
 ### Data Preprocessing Pipeline
 
-```
-Raw Data → Missing Values → Outlier Detection → Normalization → Feature Encoding → Clean Data
-    │           │                  │                 │               │              │
-    ▼           ▼                  ▼                 ▼               ▼              ▼
- Inspect    Imputation        Statistical      Standardization  One-Hot/Label   Ready for
- Quality    Strategies         Methods         Min-Max/Z-Score   Encoding       Training
+```mermaid
+flowchart LR
+    A[Raw Data] --> B[Missing Values]
+    B --> C[Outlier Detection]
+    C --> D[Normalization]
+    D --> E[Feature Encoding]
+    E --> F[Clean Data]
 ```
 
 #### Key Preprocessing Steps
 
 1. **Missing Value Treatment**
-   - Deletion strategies: listwise, pairwise
-   - Imputation methods: mean, median, mode, forward-fill, interpolation
-   - Advanced techniques: KNN imputation, MICE, deep learning imputation
+
+   * Deletion strategies: listwise, pairwise
+   * Imputation methods: mean, median, mode, forward-fill, interpolation
+   * Advanced techniques: KNN imputation, MICE, deep learning imputation
 
 2. **Outlier Detection**
-   - Statistical methods: Z-score, IQR, Mahalanobis distance
-   - Machine learning methods: Isolation Forest, LOF, DBSCAN
-   - Domain-specific thresholds
+
+   * Statistical methods: Z-score, IQR, Mahalanobis distance
+   * Machine learning methods: Isolation Forest, LOF, DBSCAN
+   * Domain-specific thresholds
 
 3. **Feature Scaling**
-   - Standardization: μ = 0, σ = 1
-   - Normalization: [0, 1] or [-1, 1]
-   - Robust scaling: using median and IQR
+
+   * Standardization: μ = 0, σ = 1
+   * Normalization: \[0, 1] or \[-1, 1]
+   * Robust scaling: using median and IQR
 
 ## Model Selection
 
 ### Model Taxonomy
 
-```
-                        Machine Learning Models
-                                │
-                ┌───────────────┼───────────────┐
-                │               │               │
-          Supervised      Unsupervised    Reinforcement
-                │               │               │
-        ┌───────┴───────┐       │               │
-        │               │       │               │
-  Classification  Regression    │               │
-        │               │       │               │
-   ┌────┼────┐     ┌────┼────┐ │               │
-   │    │    │     │    │    │ │               │
-  SVM  Tree  NN   Linear Ridge │               │
-              │          Lasso  │               │
-         ┌────┴────┐           │               │
-         │         │      ┌────┼────┐          │
-      Random    XGBoost   │         │     ┌────┴────┐
-      Forest             K-Means  DBSCAN  │         │
-                                          Q-Learning Policy
-                                                    Gradient
+```mermaid
+flowchart TD
+    A[Machine Learning Models] --> B[Supervised]
+    A --> C[Unsupervised]
+    A --> D[Reinforcement]
+
+    B --> E[Classification]
+    B --> F[Regression]
+
+    E --> G[SVM]
+    E --> H[Decision Tree]
+    E --> I[Neural Network]
+    E --> J[Random Forest]
+    E --> K[XGBoost]
+
+    F --> L[Linear]
+    F --> M[Ridge]
+    F --> N[Lasso]
+
+    C --> O[K-Means]
+    C --> P[DBSCAN]
+
+    D --> Q[Q-Learning]
+    D --> R[Policy Gradient]
 ```
 
 ### Model Selection Criteria
 
-```
-┌──────────────────────────────────────────────┐
-│           Model Selection Matrix             │
-├──────────────┬─────────────┬────────────────┤
-│   Criteria   │   Weight    │  Consideration │
-├──────────────┼─────────────┼────────────────┤
-│ Accuracy     │    25%      │ Performance    │
-│ Complexity   │    20%      │ Interpretable  │
-│ Training Time│    15%      │ Computational  │
-│ Scalability  │    20%      │ Production     │
-│ Robustness   │    20%      │ Generalization │
-└──────────────┴─────────────┴────────────────┘
+```mermaid
+flowchart TD
+    A[Model Selection Criteria]
+    A --> B[Accuracy - 25%]
+    A --> C[Complexity - 20%]
+    A --> D[Training Time - 15%]
+    A --> E[Scalability - 20%]
+    A --> F[Robustness - 20%]
 ```
 
 ## Training Process
 
 ### Training Loop Architecture
 
-```
-┌─────────────────────────────────────────────┐
-│              Training Loop                  │
-│                                             │
-│  ┌─────────┐                               │
-│  │  Start  │                               │
-│  └────┬────┘                               │
-│       │                                    │
-│       ▼                                    │
-│  ┌─────────────┐                          │
-│  │ Initialize  │                          │
-│  │ Parameters  │                          │
-│  └──────┬──────┘                          │
-│         │                                 │
-│         ▼                                 │
-│  ┌──────────────────────┐                │
-│  │  Forward Pass        │                │
-│  │  ŷ = f(X, θ)        │                │
-│  └──────────┬───────────┘                │
-│             │                             │
-│             ▼                             │
-│  ┌──────────────────────┐                │
-│  │  Compute Loss        │                │
-│  │  L = loss(y, ŷ)     │                │
-│  └──────────┬───────────┘                │
-│             │                             │
-│             ▼                             │
-│  ┌──────────────────────┐                │
-│  │  Backward Pass       │                │
-│  │  ∇θ = ∂L/∂θ         │                │
-│  └──────────┬───────────┘                │
-│             │                             │
-│             ▼                             │
-│  ┌──────────────────────┐                │
-│  │  Update Parameters   │                │
-│  │  θ = θ - α∇θ        │                │
-│  └──────────┬───────────┘                │
-│             │                             │
-│             ▼                             │
-│  ┌──────────────────────┐                │
-│  │  Convergence?        │────No───┐      │
-│  └──────────┬───────────┘         │      │
-│             │                      │      │
-│            Yes                     │      │
-│             │                      │      │
-│             ▼                      │      │
-│  ┌──────────────────────┐         │      │
-│  │  Return Model        │         │      │
-│  └──────────────────────┘         │      │
-│                                    │      │
-└────────────────────────────────────┴──────┘
+```mermaid
+flowchart TD
+    A[Start] --> B[Initialize Parameters]
+    B --> C[Forward Pass: ŷ = f(X, θ)]
+    C --> D[Compute Loss: L = loss(y, ŷ)]
+    D --> E[Backward Pass: ∇θ = ∂L/∂θ]
+    E --> F[Update Parameters: θ = θ - α∇θ]
+    F --> G{Convergence?}
+    G -- No --> C
+    G -- Yes --> H[Return Model]
 ```
 
 ### Hyperparameter Optimization
 
-```
-                 Hyperparameter Tuning Methods
-                            │
-          ┌─────────────────┼─────────────────┐
-          │                 │                 │
-     Grid Search      Random Search     Bayesian Opt
-          │                 │                 │
-    Exhaustive         Sampling          Probabilistic
-    Expensive          Efficient         Model-Based
-    Guaranteed         Stochastic        Adaptive
+```mermaid
+flowchart TD
+    A[Hyperparameter Tuning] --> B[Grid Search]
+    A --> C[Random Search]
+    A --> D[Bayesian Optimization]
+
+    B --> E[Exhaustive but Expensive]
+    C --> F[Efficient, Stochastic]
+    D --> G[Probabilistic, Adaptive]
 ```
 
 ## Evaluation and Validation
 
 ### Cross-Validation Schema
 
-```
-┌────────────────────────────────────────┐
-│         K-Fold Cross-Validation        │
-│              (K = 5)                   │
-├────────────────────────────────────────┤
-│ Fold 1: [Valid] [Train][Train][Train][Train] │
-│ Fold 2: [Train] [Valid][Train][Train][Train] │
-│ Fold 3: [Train] [Train][Valid][Train][Train] │
-│ Fold 4: [Train] [Train][Train][Valid][Train] │
-│ Fold 5: [Train] [Train][Train][Train][Valid] │
-└────────────────────────────────────────┘
-         ↓
-   Average Performance
-   Standard Deviation
+```mermaid
+flowchart TD
+    A[K-Fold Cross Validation (K=5)] --> B[Fold 1: Valid + Train x4]
+    A --> C[Fold 2: Train + Valid + Train x3]
+    A --> D[Fold 3: Train x2 + Valid + Train x2]
+    A --> E[Fold 4: Train x3 + Valid + Train]
+    A --> F[Fold 5: Train x4 + Valid]
+    F --> G[Aggregate Performance & Std. Dev.]
 ```
 
 ### Evaluation Metrics Framework
 
 #### Classification Metrics
 
+```mermaid
+flowchart TD
+    A[Confusion Matrix]
+    A --> B[TP: True Positive]
+    A --> C[FP: False Positive]
+    A --> D[TN: True Negative]
+    A --> E[FN: False Negative]
 ```
-                 Confusion Matrix
-                 ┌──────┬──────┐
-                 │  TP  │  FP  │
-    Predicted    ├──────┼──────┤
-                 │  FN  │  TN  │
-                 └──────┴──────┘
-                     Actual
 
-Precision = TP / (TP + FP)
-Recall = TP / (TP + FN)
-F1 = 2 × (Precision × Recall) / (Precision + Recall)
-Accuracy = (TP + TN) / (TP + TN + FP + FN)
-```
+* Precision = TP / (TP + FP)
+* Recall = TP / (TP + FN)
+* F1 = 2 × (Precision × Recall) / (Precision + Recall)
+* Accuracy = (TP + TN) / (TP + TN + FP + FN)
 
 #### Regression Metrics
 
@@ -300,94 +194,51 @@ R² = 1 - (SS_res / SS_tot)
 
 ### Model Diagnostics
 
-```
-        Learning Curves Analysis
-        
-Performance ↑
-    │     ┌─────── Validation
-    │    /  ┌───── Training
-    │   /  /
-    │  /  /        Good Fit
-    │ /  /
-    │/__/
-    └────────────────→ Training Size
-
-Performance ↑
-    │      ┌─────── Training
-    │     /
-    │    /    ┌─── Validation
-    │   /    /
-    │  /    /     Overfitting
-    │ /    /      (High Variance)
-    │/____/
-    └────────────────→ Training Size
-
-Performance ↑
-    │     ┌─────── Validation
-    │    /┌──────── Training
-    │   //
-    │  //         Underfitting
-    │ //          (High Bias)
-    │//
-    └────────────────→ Training Size
+```mermaid
+flowchart TD
+    A[Learning Curves]
+    A --> B[Good Fit]
+    A --> C[Overfitting: High Variance]
+    A --> D[Underfitting: High Bias]
 ```
 
 ## Deployment and Monitoring
 
 ### Deployment Architecture
 
-```
-┌─────────────────────────────────────────────┐
-│           Production Pipeline               │
-├─────────────────────────────────────────────┤
-│                                             │
-│   Data Input → Preprocessing → Model       │
-│       │            │             │          │
-│       ▼            ▼             ▼          │
-│   Validation   Transform    Inference      │
-│       │            │             │          │
-│       ▼            ▼             ▼          │
-│   Feature      Scaling      Prediction     │
-│   Vector          │             │          │
-│       └────────────┴─────────────┘          │
-│                    │                        │
-│                    ▼                        │
-│            Post-processing                  │
-│                    │                        │
-│                    ▼                        │
-│                 Output                      │
-│                                             │
-└─────────────────────────────────────────────┘
+```mermaid
+flowchart LR
+    A[Data Input] --> B[Preprocessing]
+    B --> C[Feature Scaling]
+    C --> D[Model Inference]
+    D --> E[Post-processing]
+    E --> F[Final Output]
 ```
 
 ### Model Monitoring Framework
 
-```
-┌──────────────────────────────────────┐
-│        Monitoring Dashboard          │
-├──────────────────────────────────────┤
-│                                      │
-│  Performance Metrics                 │
-│  ├── Accuracy: Real-time tracking    │
-│  ├── Latency: P50, P95, P99         │
-│  └── Throughput: Requests/sec       │
-│                                      │
-│  Data Quality                        │
-│  ├── Input distribution drift        │
-│  ├── Feature statistics             │
-│  └── Anomaly detection              │
-│                                      │
-│  System Health                       │
-│  ├── CPU/Memory usage               │
-│  ├── Error rates                    │
-│  └── Service availability           │
-│                                      │
-│  Business Metrics                    │
-│  ├── Conversion impact              │
-│  ├── User engagement                │
-│  └── Revenue attribution            │
-│                                      │
-└──────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A[Monitoring Dashboard]
+    A --> B[Performance Metrics]
+    B --> B1[Accuracy]
+    B --> B2[Latency: P50, P95, P99]
+    B --> B3[Throughput]
+
+    A --> C[Data Quality]
+    C --> C1[Distribution Drift]
+    C --> C2[Feature Statistics]
+    C --> C3[Anomaly Detection]
+
+    A --> D[System Health]
+    D --> D1[CPU/Memory]
+    D --> D2[Error Rates]
+    D --> D3[Availability]
+
+    A --> E[Business Metrics]
+    E --> E1[Conversion Impact]
+    E --> E2[Engagement]
+    E --> E3[Revenue]
 ```
 
 ## Best Practices
@@ -395,11 +246,13 @@ Performance ↑
 ### Development Workflow
 
 1. **Version Control**
-   - Track code, data versions, and model artifacts
-   - Use semantic versioning for models
-   - Maintain reproducibility through environment specifications
+
+   * Track code, data versions, and model artifacts
+   * Use semantic versioning for models
+   * Maintain reproducibility through environment specifications
 
 2. **Experiment Tracking**
+
    ```
    Experiment Registry
    ├── Experiment ID
@@ -411,89 +264,85 @@ Performance ↑
    ```
 
 3. **Testing Strategy**
-   - Unit tests for data preprocessing
-   - Integration tests for pipeline components
-   - Performance regression tests
-   - A/B testing in production
+
+   * Unit tests for data preprocessing
+   * Integration tests for pipeline components
+   * Performance regression tests
+   * A/B testing in production
 
 4. **Documentation Standards**
-   - Model cards describing purpose, performance, limitations
-   - API documentation for model endpoints
-   - Training procedure documentation
-   - Data lineage tracking
+
+   * Model cards describing purpose, performance, limitations
+   * API documentation for model endpoints
+   * Training procedure documentation
+   * Data lineage tracking
 
 ### Code Organization
 
-```
-project/
-├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── external/
-├── models/
-│   ├── trained/
-│   └── configs/
-├── notebooks/
-│   ├── exploration/
-│   └── experiments/
-├── src/
-│   ├── data/
-│   │   ├── preprocessing.py
-│   │   └── loaders.py
-│   ├── features/
-│   │   └── engineering.py
-│   ├── models/
-│   │   ├── train.py
-│   │   └── predict.py
-│   └── evaluation/
-│       └── metrics.py
-├── tests/
-├── requirements.txt
-└── README.md
+```mermaid
+flowchart TD
+    A[project/] --> B[data/]
+    B --> C[raw/]
+    B --> D[processed/]
+    B --> E[external/]
+
+    A --> F[models/]
+    F --> G[trained/]
+    F --> H[configs/]
+
+    A --> I[notebooks/]
+    I --> J[exploration/]
+    I --> K[experiments/]
+
+    A --> L[src/]
+    L --> M[data/]
+    M --> N[preprocessing.py]
+    M --> O[loaders.py]
+    L --> P[features/]
+    P --> Q[engineering.py]
+    L --> R[models/]
+    R --> S[train.py]
+    R --> T[predict.py]
+    L --> U[evaluation/]
+    U --> V[metrics.py]
+
+    A --> W[tests/]
+    A --> X[requirements.txt]
+    A --> Y[README.md]
 ```
 
 ## Common Pitfalls
 
 ### Data Leakage Prevention
 
-```
-        Common Leakage Scenarios
-        
-1. Target Leakage
-   Feature contains information about target
-   that won't be available at prediction time
-   
-2. Train-Test Contamination
-   Test data information influences training
-   through preprocessing or feature engineering
-   
-3. Temporal Leakage
-   Using future information to predict past
-   in time-series problems
+```mermaid
+flowchart TD
+    A[Common Leakage Scenarios] --> B[Target Leakage]
+    A --> C[Train-Test Contamination]
+    A --> D[Temporal Leakage]
 ```
 
 ### Overfitting Mitigation
 
-```
-     Regularization Techniques
-            │
-    ┌───────┼───────┐
-    │       │       │
-L1/L2    Dropout  Early
-Reg.             Stopping
-    │       │       │
-Sparse  Random   Validation
-Weights  Drops   Monitoring
+```mermaid
+flowchart TD
+    A[Regularization Techniques] --> B[L1/L2 Regularization]
+    B --> B1[Sparse Weights]
+    A --> C[Dropout]
+    C --> C1[Random Unit Drops]
+    A --> D[Early Stopping]
+    D --> D1[Validation Monitoring]
 ```
 
 ### Bias and Fairness
 
 Key considerations for ethical ML:
-- Dataset representation and sampling bias
-- Algorithmic fairness metrics
-- Disparate impact assessment
-- Continuous monitoring for discriminatory patterns
-- Interpretability for accountability
+
+* Dataset representation and sampling bias
+* Algorithmic fairness metrics
+* Disparate impact assessment
+* Continuous monitoring for discriminatory patterns
+* Interpretability for accountability
 
 ## Conclusion
 
@@ -507,11 +356,11 @@ As you embark on your ML journey, maintain a scientific mindset: hypothesize, ex
 
 ## References and Further Reading
 
-- Hastie, T., Tibshirani, R., & Friedman, J. (2009). *The Elements of Statistical Learning*
-- Bishop, C. M. (2006). *Pattern Recognition and Machine Learning*
-- Goodfellow, I., Bengio, Y., & Courville, A. (2016). *Deep Learning*
-- Murphy, K. P. (2012). *Machine Learning: A Probabilistic Perspective*
-- Géron, A. (2019). *Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow*
+* Hastie, T., Tibshirani, R., & Friedman, J. (2009). *The Elements of Statistical Learning*
+* Bishop, C. M. (2006). *Pattern Recognition and Machine Learning*
+* Goodfellow, I., Bengio, Y., & Courville, A. (2016). *Deep Learning*
+* Murphy, K. P. (2012). *Machine Learning: A Probabilistic Perspective*
+* Géron, A. (2019). *Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow*
 
 ## License
 
