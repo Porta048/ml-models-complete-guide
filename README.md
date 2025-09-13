@@ -10,8 +10,11 @@
 6. [Evaluation and Validation](#evaluation-and-validation)
 7. [Deployment and Monitoring](#deployment-and-monitoring)
 8. [Best Practices](#best-practices)
-9. [Common Pitfalls](#common-pitfalls)
-10. [Conclusion](#conclusion)
+9. [MLOps and Infrastructure](#mlops-and-infrastructure)
+10. [Model Governance and Ethics](#model-governance-and-ethics)
+11. [AutoML and Advanced Techniques](#automl-and-advanced-techniques)
+12. [Common Pitfalls](#common-pitfalls)
+13. [Conclusion](#conclusion)
 
 ## Introduction
 
@@ -53,11 +56,102 @@ flowchart TD
 
 ```mermaid
 flowchart LR
-    A[Raw Data] --> B[Missing Values]
-    B --> C[Outlier Detection]
-    C --> D[Normalization]
-    D --> E[Feature Encoding]
-    E --> F[Clean Data]
+    A[Raw Data] --> B[Data Quality Check]
+    B --> C[Missing Values Treatment]
+    C --> D[Outlier Detection & Handling]
+    D --> E[Feature Scaling & Normalization]
+    E --> F[Categorical Encoding]
+    F --> G[Feature Selection]
+    G --> H[Data Validation]
+    H --> I[Clean Data Ready for ML]
+
+    subgraph "Quality Assurance"
+        B
+        H
+    end
+
+    subgraph "Transformation"
+        C
+        D
+        E
+        F
+        G
+    end
+
+    style A fill:#ffebee
+    style I fill:#e8f5e8
+    style B fill:#fff3e0
+    style H fill:#fff3e0
+```
+
+### Data Preprocessing Code Example
+
+```python
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler, LabelEncoder, OneHotEncoder
+from sklearn.impute import SimpleImputer, KNNImputer
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+
+def create_preprocessing_pipeline(numerical_features, categorical_features):
+    """
+    Create a comprehensive preprocessing pipeline for ML data.
+
+    Args:
+        numerical_features: List of numerical column names
+        categorical_features: List of categorical column names
+
+    Returns:
+        sklearn Pipeline object
+    """
+
+    # Numerical preprocessing pipeline
+    numerical_pipeline = Pipeline([
+        ('imputer', KNNImputer(n_neighbors=5)),
+        ('scaler', StandardScaler())
+    ])
+
+    # Categorical preprocessing pipeline
+    categorical_pipeline = Pipeline([
+        ('imputer', SimpleImputer(strategy='mode')),
+        ('onehot', OneHotEncoder(drop='first', sparse=False, handle_unknown='ignore'))
+    ])
+
+    # Combine preprocessing steps
+    preprocessor = ColumnTransformer([
+        ('num', numerical_pipeline, numerical_features),
+        ('cat', categorical_pipeline, categorical_features)
+    ])
+
+    return preprocessor
+
+# Example usage
+def preprocess_data(df, target_column):
+    """
+    Complete data preprocessing with feature engineering.
+    """
+    # Separate features and target
+    X = df.drop(columns=[target_column])
+    y = df[target_column]
+
+    # Identify feature types
+    numerical_features = X.select_dtypes(include=['int64', 'float64']).columns.tolist()
+    categorical_features = X.select_dtypes(include=['object', 'category']).columns.tolist()
+
+    # Create and fit preprocessing pipeline
+    preprocessor = create_preprocessing_pipeline(numerical_features, categorical_features)
+    X_processed = preprocessor.fit_transform(X)
+
+    # Create feature names for processed data
+    feature_names = (
+        numerical_features +
+        list(preprocessor.named_transformers_['cat']
+             .named_steps['onehot']
+             .get_feature_names_out(categorical_features))
+    )
+
+    return pd.DataFrame(X_processed, columns=feature_names), y, preprocessor
 ```
 
 #### Key Preprocessing Steps
@@ -115,12 +209,42 @@ flowchart TD
 ```mermaid
 flowchart TD
     A[Model Selection Criteria]
-    A --> B[Accuracy - 25%]
-    A --> C[Complexity - 20%]
+    A --> B[Performance - 30%]
+    A --> C[Complexity - 15%]
     A --> D[Training Time - 15%]
     A --> E[Scalability - 20%]
     A --> F[Robustness - 20%]
+
+    B --> B1[Accuracy/F1]
+    B --> B2[Precision/Recall]
+    B --> B3[AUC-ROC]
+
+    C --> C1[Model Interpretability]
+    C --> C2[Parameter Count]
+    C --> C3[Memory Usage]
+
+    D --> D1[Training Duration]
+    D --> D2[Convergence Speed]
+
+    E --> E1[Horizontal Scaling]
+    E --> E2[Data Volume Handling]
+    E --> E3[Real-time Performance]
+
+    F --> F1[Noise Tolerance]
+    F --> F2[Distribution Shift]
+    F --> F3[Adversarial Robustness]
 ```
+
+### Algorithm Comparison Matrix
+
+| Algorithm | Accuracy | Speed | Interpretability | Scalability | Memory |
+|-----------|----------|-------|------------------|-------------|---------|
+| Linear Regression | ⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐⭐ |
+| Random Forest | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐ |
+| XGBoost | ⭐⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
+| SVM | ⭐⭐⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐ | ⭐⭐⭐ |
+| Neural Network | ⭐⭐⭐⭐⭐ | ⭐⭐ | ⭐ | ⭐⭐⭐⭐ | ⭐⭐ |
+| K-Means | ⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ | ⭐⭐⭐⭐ |
 
 ## Training Process
 
@@ -128,14 +252,84 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[Start] --> B[Initialize Parameters]
-    B --> C[Forward Pass: ŷ = f(X, θ)]
-    C --> D[Compute Loss: L = loss(y, ŷ)]
-    D --> E[Backward Pass: ∇θ = ∂L/∂θ]
-    E --> F[Update Parameters: θ = θ - α∇θ]
-    F --> G{Convergence?}
-    G -- No --> C
-    G -- Yes --> H[Return Model]
+    A[Start] --> B[Initialize Parameters θ₀]
+    B --> C[Load Batch Data X_i, y_i]
+    C --> D[Forward Pass: ŷ = f(X_i, θ)]
+    D --> E[Compute Loss: L = loss(y_i, ŷ)]
+    E --> F[Backward Pass: ∇θ = ∂L/∂θ]
+    F --> G[Update Parameters: θ = θ - α∇θ]
+    G --> H[Update Learning Rate α]
+    H --> I{Early Stopping?}
+    I -- Yes --> J[Save Best Model]
+    I -- No --> K{Epoch Complete?}
+    K -- No --> C
+    K -- Yes --> L[Validate on Val Set]
+    L --> M{Convergence?}
+    M -- No --> N[Next Epoch]
+    N --> C
+    M -- Yes --> J
+    J --> O[Final Model θ*]
+
+    style A fill:#e1f5fe
+    style J fill:#c8e6c9
+    style O fill:#f3e5f5
+```
+
+### Training Process Code Example
+
+```python
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+import joblib
+
+def train_model(X, y, config):
+    """
+    Complete training pipeline with validation and model persistence.
+
+    Args:
+        X: Feature matrix
+        y: Target vector
+        config: Model configuration dictionary
+
+    Returns:
+        trained_model: Fitted model object
+        metrics: Training and validation metrics
+    """
+    # Split data
+    X_train, X_temp, y_train, y_temp = train_test_split(
+        X, y, test_size=config['test_size'], random_state=config['random_state']
+    )
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_temp, y_temp, test_size=0.5, random_state=config['random_state']
+    )
+
+    # Initialize model
+    model = RandomForestClassifier(
+        n_estimators=config['n_estimators'],
+        max_depth=config['max_depth'],
+        random_state=config['random_state']
+    )
+
+    # Training loop with validation
+    model.fit(X_train, y_train)
+
+    # Validation
+    train_pred = model.predict(X_train)
+    val_pred = model.predict(X_val)
+
+    metrics = {
+        'train_accuracy': accuracy_score(y_train, train_pred),
+        'val_accuracy': accuracy_score(y_val, val_pred),
+        'train_report': classification_report(y_train, train_pred),
+        'val_report': classification_report(y_val, val_pred)
+    }
+
+    # Save model
+    joblib.dump(model, f"models/{config['model_name']}_v{config['version']}.pkl")
+
+    return model, metrics, (X_test, y_test)
 ```
 
 ### Hyperparameter Optimization
@@ -241,6 +435,166 @@ flowchart TD
     E --> E3[Revenue]
 ```
 
+### Container and Infrastructure Schema
+
+```mermaid
+flowchart TD
+    A[ML Model Deployment] --> B[Containerization]
+    A --> C[Orchestration]
+    A --> D[Scaling]
+
+    B --> B1[Docker Image]
+    B1 --> B11[Base Image: python:3.9-slim]
+    B1 --> B12[Dependencies: requirements.txt]
+    B1 --> B13[Model Artifacts]
+    B1 --> B14[Serving Code]
+
+    C --> C1[Kubernetes]
+    C1 --> C11[Deployment]
+    C1 --> C12[Service]
+    C1 --> C13[Ingress]
+    C1 --> C14[ConfigMap/Secrets]
+
+    D --> D1[Horizontal Pod Autoscaler]
+    D --> D2[Load Balancer]
+    D --> D3[Resource Limits]
+```
+
+### Model Serving Code Example
+
+```python
+from flask import Flask, request, jsonify
+import joblib
+import pandas as pd
+import numpy as np
+from datetime import datetime
+import logging
+
+# Initialize Flask app
+app = Flask(__name__)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+class ModelServer:
+    def __init__(self, model_path, preprocessor_path):
+        """Initialize model server with trained model and preprocessor."""
+        self.model = joblib.load(model_path)
+        self.preprocessor = joblib.load(preprocessor_path)
+        self.prediction_count = 0
+        logger.info("Model server initialized successfully")
+
+    def predict(self, data):
+        """Make predictions on input data."""
+        try:
+            # Convert to DataFrame
+            df = pd.DataFrame([data])
+
+            # Preprocess data
+            X_processed = self.preprocessor.transform(df)
+
+            # Make prediction
+            prediction = self.model.predict(X_processed)[0]
+            probability = self.model.predict_proba(X_processed)[0].max()
+
+            self.prediction_count += 1
+
+            return {
+                'prediction': int(prediction),
+                'probability': float(probability),
+                'timestamp': datetime.now().isoformat(),
+                'model_version': '1.0.0'
+            }
+
+        except Exception as e:
+            logger.error(f"Prediction error: {str(e)}")
+            raise
+
+# Initialize model server
+model_server = ModelServer(
+    model_path='models/trained_model_v1.0.0.pkl',
+    preprocessor_path='models/preprocessor_v1.0.0.pkl'
+)
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    """Health check endpoint."""
+    return jsonify({
+        'status': 'healthy',
+        'predictions_served': model_server.prediction_count,
+        'timestamp': datetime.now().isoformat()
+    })
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    """Prediction endpoint."""
+    try:
+        # Validate input
+        if not request.json:
+            return jsonify({'error': 'No JSON data provided'}), 400
+
+        # Make prediction
+        result = model_server.predict(request.json)
+        logger.info(f"Prediction made: {result}")
+
+        return jsonify(result)
+
+    except Exception as e:
+        logger.error(f"Prediction endpoint error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/metrics', methods=['GET'])
+def metrics():
+    """Metrics endpoint for monitoring."""
+    return jsonify({
+        'predictions_total': model_server.prediction_count,
+        'model_loaded': bool(model_server.model),
+        'uptime': datetime.now().isoformat()
+    })
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=False)
+```
+
+### Docker Configuration Example
+
+```dockerfile
+# Dockerfile for ML model deployment
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY src/ ./src/
+COPY models/ ./models/
+COPY schemas/ ./schemas/
+
+# Create non-root user
+RUN groupadd -r mluser && useradd -r -g mluser mluser
+RUN chown -R mluser:mluser /app
+USER mluser
+
+# Expose port
+EXPOSE 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD curl -f http://localhost:5000/health || exit 1
+
+# Start application
+CMD ["python", "src/app.py"]
+```
+
 ## Best Practices
 
 ### Development Workflow
@@ -309,7 +663,190 @@ flowchart TD
     A --> W[tests/]
     A --> X[requirements.txt]
     A --> Y[README.md]
+    A --> Z[schemas/]
+    Z --> Z1[model_config.json]
+    Z --> Z2[training_config.json]
+    Z --> Z3[deployment_config.json]
 ```
+
+## MLOps and Infrastructure
+
+### MLOps Pipeline Architecture
+
+```mermaid
+flowchart LR
+    A[Code Repository] --> B[CI/CD Pipeline]
+    B --> C[Model Training]
+    C --> D[Model Validation]
+    D --> E[Model Registry]
+    E --> F[Deployment Pipeline]
+    F --> G[Production Serving]
+    G --> H[Monitoring & Feedback]
+    H --> A
+
+    subgraph "Development"
+        A
+        B
+    end
+
+    subgraph "Training"
+        C
+        D
+        E
+    end
+
+    subgraph "Production"
+        F
+        G
+        H
+    end
+```
+
+### Model Lifecycle Management
+
+```mermaid
+flowchart TD
+    A[Model Development] --> B[Experiment Tracking]
+    B --> C[Model Versioning]
+    C --> D[Performance Validation]
+    D --> E[Model Registry]
+    E --> F[Deployment Pipeline]
+    F --> G[A/B Testing]
+    G --> H[Production Monitoring]
+    H --> I{Performance OK?}
+    I -- No --> J[Model Retraining]
+    I -- Yes --> K[Continue Monitoring]
+    J --> C
+    K --> H
+```
+
+### Infrastructure Components
+
+| Component | Purpose | Tools | Scalability |
+|-----------|---------|-------|-------------|
+| **Feature Store** | Centralized feature management | Feast, Tecton, AWS Feature Store | ⭐⭐⭐⭐⭐ |
+| **Model Registry** | Model versioning & metadata | MLflow, DVC, Neptune | ⭐⭐⭐⭐ |
+| **Training Platform** | Distributed training | Kubeflow, SageMaker, Vertex AI | ⭐⭐⭐⭐⭐ |
+| **Serving Platform** | Model inference | TensorFlow Serving, Seldon, KServe | ⭐⭐⭐⭐⭐ |
+| **Monitoring** | Performance & drift detection | Evidently, Alibi Detect, Arize | ⭐⭐⭐⭐ |
+
+### CI/CD for Machine Learning
+
+```mermaid
+flowchart TD
+    A[Code Commit] --> B[Unit Tests]
+    B --> C[Data Validation]
+    C --> D[Model Training]
+    D --> E[Model Testing]
+    E --> F[Performance Benchmark]
+    F --> G{Pass Threshold?}
+    G -- Yes --> H[Deploy to Staging]
+    G -- No --> I[Reject & Notify]
+    H --> J[Integration Tests]
+    J --> K[Deploy to Production]
+    K --> L[Monitor & Alert]
+```
+
+## Model Governance and Ethics
+
+### Governance Framework
+
+```mermaid
+flowchart TD
+    A[Model Governance] --> B[Data Governance]
+    A --> C[Model Risk Management]
+    A --> D[Ethical AI Framework]
+    A --> E[Compliance & Audit]
+
+    B --> B1[Data Quality]
+    B --> B2[Data Lineage]
+    B --> B3[Privacy Protection]
+    B --> B4[Data Access Controls]
+
+    C --> C1[Model Risk Assessment]
+    C --> C2[Performance Monitoring]
+    C --> C3[Model Validation]
+    C --> C4[Fallback Strategies]
+
+    D --> D1[Fairness Metrics]
+    D --> D2[Bias Detection]
+    D --> D3[Explainability]
+    D --> D4[Human Oversight]
+
+    E --> E1[Regulatory Compliance]
+    E --> E2[Audit Trails]
+    E --> E3[Documentation Standards]
+    E --> E4[Risk Reporting]
+```
+
+### Bias and Fairness Assessment
+
+| Bias Type | Detection Method | Mitigation Strategy | Monitoring Frequency |
+|-----------|------------------|-------------------|---------------------|
+| **Historical Bias** | Statistical parity analysis | Data augmentation, resampling | Monthly |
+| **Representation Bias** | Demographic parity check | Diverse data collection | Quarterly |
+| **Measurement Bias** | Feature importance analysis | Feature engineering review | Bi-annually |
+| **Evaluation Bias** | Cross-group validation | Multi-metric evaluation | Continuously |
+| **Deployment Bias** | A/B testing analysis | Targeted interventions | Weekly |
+
+### Model Explainability Framework
+
+```mermaid
+flowchart TD
+    A[Model Interpretability] --> B[Global Explanations]
+    A --> C[Local Explanations]
+    A --> D[Counterfactual Explanations]
+
+    B --> B1[Feature Importance]
+    B --> B2[Partial Dependence Plots]
+    B --> B3[Global Surrogate Models]
+
+    C --> C1[LIME]
+    C --> C2[SHAP]
+    C --> C3[Integrated Gradients]
+
+    D --> D1[What-if Analysis]
+    D --> D2[Minimal Changes]
+    D --> D3[Alternative Outcomes]
+```
+
+## AutoML and Advanced Techniques
+
+### AutoML Pipeline
+
+```mermaid
+flowchart LR
+    A[Raw Data] --> B[Automated Data Preprocessing]
+    B --> C[Feature Engineering]
+    C --> D[Algorithm Selection]
+    D --> E[Hyperparameter Optimization]
+    E --> F[Model Ensemble]
+    F --> G[Performance Validation]
+    G --> H[Best Model Selection]
+```
+
+### Neural Architecture Search (NAS)
+
+```mermaid
+flowchart TD
+    A[Search Space Definition] --> B[Architecture Sampling]
+    B --> C[Model Training]
+    C --> D[Performance Evaluation]
+    D --> E[Search Strategy Update]
+    E --> F{Convergence?}
+    F -- No --> B
+    F -- Yes --> G[Optimal Architecture]
+```
+
+### Advanced Optimization Techniques
+
+| Technique | Use Case | Complexity | Performance Gain |
+|-----------|----------|------------|------------------|
+| **Bayesian Optimization** | Hyperparameter tuning | Medium | ⭐⭐⭐⭐ |
+| **Multi-objective Optimization** | Pareto-optimal solutions | High | ⭐⭐⭐⭐⭐ |
+| **Population-based Training** | Dynamic hyperparameter schedules | High | ⭐⭐⭐⭐ |
+| **Evolutionary Algorithms** | Architecture search | Very High | ⭐⭐⭐⭐⭐ |
+| **Gradient-based Meta-learning** | Few-shot learning | Very High | ⭐⭐⭐⭐⭐ |
 
 ## Common Pitfalls
 
