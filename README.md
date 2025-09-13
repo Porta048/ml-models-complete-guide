@@ -46,10 +46,10 @@ Each stage in this pipeline is critical and interconnected. Failures or oversigh
 
 ```mermaid
 flowchart TD
-    A[Original Dataset (100%)] --> B[Training Set (80%)]
-    A --> C[Test Set (20%)]
-    B --> D[Train Subset (64%)]
-    B --> E[Validation Subset (16%)]
+    A[Original Dataset 100%] --> B[Training Set 80%]
+    A --> C[Test Set 20%]
+    B --> D[Train Subset 64%]
+    B --> E[Validation Subset 16%]
 ```
 
 ### Data Preprocessing Pipeline
@@ -252,13 +252,13 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[Start] --> B[Initialize Parameters θ₀]
-    B --> C[Load Batch Data X_i, y_i]
-    C --> D[Forward Pass: ŷ = f(X_i, θ)]
-    D --> E[Compute Loss: L = loss(y_i, ŷ)]
-    E --> F[Backward Pass: ∇θ = ∂L/∂θ]
-    F --> G[Update Parameters: θ = θ - α∇θ]
-    G --> H[Update Learning Rate α]
+    A[Start] --> B[Initialize Parameters]
+    B --> C[Load Batch Data]
+    C --> D[Forward Pass]
+    D --> E[Compute Loss]
+    E --> F[Backward Pass]
+    F --> G[Update Parameters]
+    G --> H[Update Learning Rate]
     H --> I{Early Stopping?}
     I -- Yes --> J[Save Best Model]
     I -- No --> K{Epoch Complete?}
@@ -268,7 +268,7 @@ flowchart TD
     M -- No --> N[Next Epoch]
     N --> C
     M -- Yes --> J
-    J --> O[Final Model θ*]
+    J --> O[Final Model]
 
     style A fill:#e1f5fe
     style J fill:#c8e6c9
@@ -351,12 +351,12 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[K-Fold Cross Validation (K=5)] --> B[Fold 1: Valid + Train x4]
+    A[K-Fold Cross Validation K=5] --> B[Fold 1: Valid + Train x4]
     A --> C[Fold 2: Train + Valid + Train x3]
     A --> D[Fold 3: Train x2 + Valid + Train x2]
     A --> E[Fold 4: Train x3 + Valid + Train]
     A --> F[Fold 5: Train x4 + Valid]
-    F --> G[Aggregate Performance & Std. Dev.]
+    F --> G[Aggregate Performance and Std Dev]
 ```
 
 ### Evaluation Metrics Framework
